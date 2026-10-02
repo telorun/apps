@@ -1,0 +1,12 @@
+.telo
+node_modules
+dist
+.env.local
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.claude/*.lock
+.claude/settings.local.json
+.claude/loops/*
+!.claude/loops/TEMPLATE.md
+!.claude/loops/BACKLOG.md

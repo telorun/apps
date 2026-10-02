@@ -1,0 +1,15 @@
+# The release anchor. Its LOCATION is what every module key, ledger entry and
+# fragment path is relative to, and where the shared `.telo` cache lives.
+release:
+  # An app's ref is this base plus its own directory name:
+  # `oci://ghcr.io/telorun/apps/plan-approval`.
+  registry: oci://ghcr.io/telorun/apps
+  modules:
+    # Every app and shared library at the repo root. Anchored: a bare `*` would
+    # also claim every test fixture that carries a `metadata.version`.
+    - /*
+    # A module nested inside an app publishes beneath that app's ref
+    # (`…/apps/plan-approval/plans`), which is where the app's own relative
+    # import of it canonicalizes to. One entry per app that holds any.
+    - path: /plan-approval/*
+      registry: oci://ghcr.io/telorun/apps/plan-approval

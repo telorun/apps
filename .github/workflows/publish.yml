@@ -1,0 +1,103 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+  # Recovery. Both jobs derive their work from what is already published rather
+  # than from a previous run's exit code, so a dispatch re-runs them safely.
+  workflow_dispatch:
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # App ARTIFACTS. Versioning happens in the Version PR below; this only pushes
+  # what is already versioned. Runs on every push to main, not only on a release
+  # commit: both gates in the script are idempotent (version moved in this commit,
+  # or version absent at the registry), so nothing is republished and a failed
+  # push heals on the next push. A fork never pushes.
+  publish-apps:
+    name: Publish app artifacts
+    runs-on: ubuntu-latest
+    if: github.repository == 'telorun/apps'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # HEAD^ needed by the version-moved gate
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install telo CLI
+        run: npm install -g @telorun/cli
+
+      # The OCI transport reads the ambient Docker credential chain, so logging in
+      # here is what authorizes the push.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # The variable is the script's switch; each destination comes from
+      # `release.registry` in telo-workspace.yaml.
+      - name: Publish apps
+        env:
+          TELO_OCI_REGISTRY: oci://ghcr.io/telorun/apps
+        run: node scripts/publish-apps.mjs
+
+  # Apps are versioned by `telo release`. This job plans the bumps and opens a
+  # single Version PR; merging it is what makes the job above publish.
+  release-pr:
+    name: Version PR
+    runs-on: ubuntu-latest
+    if: github.repository == 'telorun/apps'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install telo CLI
+        run: npm install -g @telorun/cli
+
+      # CAPTURED BEFORE APPLY. `telo release apply` consumes the fragments the
+      # changelog entries come from, so a plan read afterwards can say which
+      # versions moved but not why — the half of the body worth reading.
+      - name: Capture the release plan
+        run: telo release status -o json --base HEAD > /tmp/release-plan.json
+
+      # Writes every planned version into each manifest, appends the changelogs,
+      # updates the ledger, and deletes the fragments it consumed. A no-op when
+      # nothing drifted, so the PR step below finds no changes and opens nothing.
+      - name: Apply the release plan
+        run: telo release apply --base HEAD
+
+      - name: Render the PR body
+        run: node scripts/release-pr-body.mjs /tmp/release-plan.json > /tmp/release-body.md
+
+      - name: Open Version PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: app-release/main
+          base: main
+          title: "chore(release): version apps"
+          commit-message: "chore(release): version apps"
+          body-path: /tmp/release-body.md
