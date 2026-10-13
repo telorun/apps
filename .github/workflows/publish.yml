@@ -12,15 +12,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # App ARTIFACTS. Versioning happens in the Version PR below; this only pushes
+  # Module ARTIFACTS. Versioning happens in the Version PR below; this only pushes
   # what is already versioned. Runs on every push to main, not only on a release
   # commit: both gates in the script are idempotent (version moved in this commit,
   # or version absent at the registry), so nothing is republished and a failed
   # push heals on the next push. A fork never pushes.
-  publish-apps:
-    name: Publish app artifacts
+  publish-modules:
+    name: Publish module artifacts
     runs-on: ubuntu-latest
-    if: github.repository == 'telorun/apps'
+    if: github.repository == 'telorun/solutions'
     permissions:
       contents: read
       packages: write
@@ -49,17 +49,17 @@ jobs:
 
       # The variable is the script's switch; each destination comes from
       # `release.registry` in telo-workspace.yaml.
-      - name: Publish apps
+      - name: Publish modules
         env:
-          TELO_OCI_REGISTRY: oci://ghcr.io/telorun/apps
-        run: node scripts/publish-apps.mjs
+          TELO_OCI_REGISTRY: oci://ghcr.io/telorun/solutions
+        run: node scripts/publish-modules.mjs
 
-  # Apps are versioned by `telo release`. This job plans the bumps and opens a
+  # Modules are versioned by `telo release`. This job plans the bumps and opens a
   # single Version PR; merging it is what makes the job above publish.
   release-pr:
     name: Version PR
     runs-on: ubuntu-latest
-    if: github.repository == 'telorun/apps'
+    if: github.repository == 'telorun/solutions'
     permissions:
       contents: write
       pull-requests: write
@@ -96,8 +96,8 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: app-release/main
+          branch: release/main
           base: main
-          title: "chore(release): version apps"
-          commit-message: "chore(release): version apps"
+          title: "chore(release): version modules"
+          commit-message: "chore(release): version modules"
           body-path: /tmp/release-body.md

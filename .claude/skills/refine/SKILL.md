@@ -5,11 +5,11 @@ description: Surface concrete options to refine or refactor a given app. Read-on
 
 Do NOT modify any files. This is a read-only analysis task.
 
-The user will supply an app path (or name) as `$ARGUMENTS`. If `$ARGUMENTS` is empty or ambiguous (e.g. a prefix that matches several directories of one product), ask the user to clarify before proceeding.
+The user will supply the path (or name) of an application or library as `$ARGUMENTS`. If `$ARGUMENTS` is empty or ambiguous (e.g. a domain holding several members), ask the user to clarify before proceeding.
 
-## Step 1: Locate the app
+## Step 1: Locate the member
 
-Resolve `$ARGUMENTS` to a concrete directory. Apps sit at the repo root, one directory each; a library specific to an app is a subdirectory of it. Confirm the resolved path before spawning the agent.
+Resolve `$ARGUMENTS` to a concrete directory. Domains sit at the repo root, one directory each; a domain's applications and libraries sit directly inside it. Confirm the resolved path before spawning the agent.
 
 ## Step 2: Refine
 

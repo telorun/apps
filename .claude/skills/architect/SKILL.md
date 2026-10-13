@@ -334,8 +334,8 @@ loop ends.
 **5. Gate — you run it, not the builder.** Run the card's gate commands yourself, write each one
 and its full output to the card's `gate.md`, and put the one-line result in the card. A builder
 reporting "tests pass" is a claim; your own run is evidence, and the difference is the entire
-point of the gate. For this repo the gates are `telo ./<app>/test-suite.yaml` for the behaviour of
-every app the card touches, `telo check <manifests>` for any manifest touched, the build and unit
+point of the gate. For this repo the gates are `telo ./<domain>/<member>/test-suite.yaml` for the behaviour of
+every application and library the card touches, `telo check <manifests>` for any manifest touched, the build and unit
 tests of a web package it touches, `telo release check`, and the card's own acceptance criteria —
 including its README, listing metadata and release fragment, which are as checkable as a test.
 

@@ -2,8 +2,8 @@
 // Renders the Version PR's body from a release plan.
 //
 // WHY THE BODY IS GENERATED RATHER THAN STATIC. Merging this PR publishes every
-// app it lists. A body that says "versions moved" describes the mechanism and
-// hides the decision; what a reviewer needs is every app that will publish, the
+// module it lists. A body that says "versions moved" describes the mechanism and
+// hides the decision; what a reviewer needs is every module that will publish, the
 // version it moves to, and the changelog entries that will ship with it. All of
 // that is already in the plan, so restating it here costs nothing and leaves
 // nothing to be taken on trust.
@@ -36,7 +36,7 @@ function bulletsFor(entries, entryLimit) {
       const text = entry.body.replace(/\s+/g, " ").trim();
       const shown =
         entryLimit && text.length > entryLimit
-          ? `${text.slice(0, entryLimit).trimEnd()}… _(trimmed — full text in the app's CHANGELOG)_`
+          ? `${text.slice(0, entryLimit).trimEnd()}… _(trimmed — full text in the module's CHANGELOG)_`
           : text;
       lines.push(`  - **${kind}** — ${shown}`);
     }
@@ -51,7 +51,7 @@ function build(plan, entryLimit) {
 
   const out = [
     `Merging this publishes **${modules.length} artifact${modules.length === 1 ? "" : "s"}** to ` +
-      "`oci://ghcr.io/telorun/apps` — " +
+      "`oci://ghcr.io/telorun/solutions` — " +
       `${declared.length} with a declared change, ${inferred.length} whose payload moved underneath ` +
       "them. Versions, changelogs and `.changes/ledger.yaml` were written by `telo release apply`.",
     "",
@@ -97,7 +97,7 @@ function build(plan, entryLimit) {
 // trimmed ones, then a cut on a line boundary that says it was cut.
 function render(plan) {
   if ((plan.modules ?? []).length === 0) {
-    return "No version moved — every app matches the ledger.\n";
+    return "No version moved — every module matches the ledger.\n";
   }
   for (const entryLimit of [0, MAX_ENTRY, 200]) {
     const body = build(plan, entryLimit);
@@ -106,7 +106,7 @@ function render(plan) {
   const body = build(plan, 200);
   const notice =
     "\n\n> **Trimmed to fit GitHub's body limit.** The rest is in `.changes/ledger.yaml` and " +
-    "each app's CHANGELOG in this PR's diff.\n";
+    "each module's CHANGELOG in this PR's diff.\n";
   const room = MAX_BODY - notice.length;
   const cut = body.slice(0, room);
   const lastBreak = cut.lastIndexOf("\n");

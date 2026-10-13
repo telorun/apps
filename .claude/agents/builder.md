@@ -40,8 +40,8 @@ that cost a whole extra round:
   persisted shape is declared, typed and described in the manifest and documented in the app's
   README in the same task. `CLAUDE.md` makes both mandatory.
 - **Release bookkeeping is part of the change.** A change to a published file needs a fragment,
-  written with `telo release add` and never by hand. Never edit `metadata.version`. A module
-  nested inside an app needs its entry in `telo-workspace.yaml`.
+  written with `telo release add` and never by hand. Never edit `metadata.version`. A new
+  domain needs its entry in `telo-workspace.yaml`.
 - **Tests prove the task's behaviour, once each.** One test per behaviour, at the lowest level
   that proves it. No second test of a behaviour already proven, no test of machinery a published
   module owns and tests, no assertions on internals the task does not name. Each test has its own

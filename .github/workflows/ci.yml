@@ -17,25 +17,26 @@ jobs:
         with:
           node-version: 24
 
-      # The published CLI, deliberately: an app is run by whoever obtains it, on a
-      # released telo, so that is what it is checked and tested against.
+      # The published CLI, deliberately: a module is run or imported by whoever
+      # obtains it, on a released telo, so that is what it is checked and tested
+      # against.
       - name: Install telo CLI
         run: npm install -g @telorun/cli
 
-      # Every app and library at the root, and every module nested inside one.
+      # Every application and library of every domain.
       - name: Static check
         run: |
           shopt -s nullglob
-          manifests=(*/telo.yaml */*/telo.yaml)
+          manifests=(*/*/telo.yaml)
           telo check "${manifests[@]}"
 
-      # Each app carries its own suite. One failing does not stop the others, so a
-      # run shows the state of every app.
+      # Each member carries its own suite. One failing does not stop the others, so
+      # a run shows the state of every one.
       - name: Manifest tests
         run: |
           shopt -s nullglob
           failed=0
-          for suite in */test-suite.yaml; do
+          for suite in */*/test-suite.yaml; do
             echo "::group::$suite"
             telo "./$suite" || failed=1
             echo "::endgroup::"
@@ -59,10 +60,10 @@ jobs:
         run: npm install -g @telorun/cli
 
       # Fails when no consistent release plan can be formed: a fragment naming an
-      # unknown module, a major-inducing kind (apps are pre-1.0), a manifest version
+      # unknown module, a major-inducing kind (modules are pre-1.0), a manifest version
       # disagreeing with its ledger entry, two modules resolving to one ref, or a
       # relative import that canonicalizes to a ref nothing publishes. It does NOT
       # fail merely because a payload moved — that ships as an unattributed patch.
-      # It warns when an app's own files changed and no fragment names it.
+      # It warns when a module's own files changed and no fragment names it.
       - name: Release plan is consistent
         run: telo release check

@@ -73,7 +73,7 @@ Do NOT write the plan until the user explicitly says to write it (e.g. "write th
 
 ## Phase 6 — Write the plan
 
-Write it to `<app>/plans/<kebab-case-name>.md` in the app the plan affects the most (see `CLAUDE.md`). The plan must be:
+Write it to `<domain>/<member>/plans/<kebab-case-name>.md` in the application or library the plan affects the most (see `CLAUDE.md`). The plan must be:
 
 - **Short** — aim for one page; never more than two.
 - **High-level** — architecture, the split between the application and its libraries, data flow, key decisions and their rationale.

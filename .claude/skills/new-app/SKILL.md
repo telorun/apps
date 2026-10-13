@@ -12,7 +12,7 @@ A new app is delivered whole: a manifest that runs as obtained, its contract, it
 
 A bare invocation or a one-word topic is not enough. Ask what the app does, who runs it, who calls it, and what problem it solves. Do not scan anything before you have a workable description.
 
-When the description is really a feature of an app that already exists here, say so and stop — that is `/plan`, not a new app.
+When the description is really a feature of an app that already exists here, say so and stop — that is `/plan`, not a new app. When it is something to import and compose instead of something to run, that is `/new-library`.
 
 ## Step 2 — Find what it is composed from (silent)
 
@@ -25,7 +25,7 @@ When the description is really a feature of an app that already exists here, say
 
 State the app as someone running it will meet it. No YAML, no file paths.
 
-- **Name** — the directory (kebab-case) and `metadata.name` (PascalCase). When the product is several artifacts — a server, a second application working with it, a library pinning the contract between them, a web UI — name each and say why it is its own artifact.
+- **Name** — the domain it belongs to (an existing one, or a new directory at the repo root), the member directory inside it (kebab-case, named for its role, never repeating the domain) and `metadata.name` (PascalCase: the domain followed by the role). When the app is several artifacts — a server, a second application working with it, a library holding the domain's data and operations, a library pinning the contract between two applications, a web UI — name each and say why it is its own member.
 - **Listing** — the `description` (one paragraph, the problem it solves, the words a searcher would type), `categories`, `license`.
 - **Contract** — every `variables`, `secrets` and `ports` entry: its env var, type, default, and one line on what it means. Say which have no default and why none can be right.
 - **Surface** — routes with their bodies and answers, error codes with their statuses, commands, files it writes.
@@ -38,9 +38,9 @@ Every choice between shapes is put to the user with a recommendation; none is ma
 
 ## Step 4 — Write
 
-In the app's own directory at the repo root:
+In the app's own directory inside its domain (`<domain>/<member>/`):
 
-- `telo.yaml` — the `Telo.Application`, following every manifest rule in `CLAUDE.md`. `metadata.repository` is `https://github.com/telorun/apps` and `metadata.license` is `MIT`.
+- `telo.yaml` — the `Telo.Application`, following every manifest rule in `CLAUDE.md`. `metadata.repository` is `https://github.com/telorun/solutions` and `metadata.license` is `MIT`.
 - `README.md` — what the app is, how to run it with a table of every environment variable, its trust model, its surface, how to run its tests.
 - `tests/*.yaml` — one application per subject area, each with its own port and scratch files; fixtures under `tests/__fixtures__/`.
 - `test-suite.yaml` — the suite that discovers `tests/*.yaml` and excludes `**/__fixtures__/**`.
@@ -48,7 +48,7 @@ In the app's own directory at the repo root:
 
 Pin every import with `telo upgrade`.
 
-When the app holds a module of its own in a subdirectory, add that app's entry to `telo-workspace.yaml`, naming the base beneath the app's ref. A new app needs no release fragment: its first version is published because it is not yet at the registry.
+What a second application of the domain would need — its tables, its operations, its shared types — goes into a sibling library the app imports by relative path, not into the app's manifest. When the domain is new, add its entry to `telo-workspace.yaml`: its path and the registry base beneath it. A new app needs no release fragment: its first version is published because it is not yet at the registry.
 
 ## Step 5 — Verify, then report
 
@@ -57,6 +57,6 @@ Run each and read its output:
 1. `telo check` on every manifest written.
 2. The app's test suite.
 3. **Runs as obtained** — start the app from a directory outside this repo, supplying only inputs its manifest declares, and exercise its surface once. Then start it with a required input missing and confirm the refusal names that input.
-4. **Publishes** — `telo release check`, then `node scripts/publish-apps.mjs --dry-run`: the app and every module it holds are queued for the ref expected, and each passes. Nothing is pushed.
+4. **Publishes** — `telo release check`, then `node scripts/publish-modules.mjs --dry-run`: the app and every sibling it imports are queued for the ref expected, and each passes. Nothing is pushed.
 
 Report what was written, the commands with their real results, and anything not verified — said as not verified. A failure is reported as a failure, with its output.
